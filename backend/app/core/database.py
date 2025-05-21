@@ -1,35 +1,26 @@
-from supabase import create_client, Client
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, declarative_base
 from dotenv import load_dotenv
-import os 
+import os
+import sys
 
 load_dotenv()
 
-KEY = os.getenv("SUPABASE_KEY")
-URL = os.getenv("SUPABASE_URL")
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    sys.exit("Error: La variable de entorno 'DATABASE_URL' no está configurada.")
 
-Supabase: Client = create_client(URL, KEY)
-
-def get_supabase_client() -> Client:
-    return Supabase
-
-
-
-# Supabase.table('roles').insert(({'name': 'admin', 'description':'idk xd'})).execute()
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
 
 
-
-
-#para quemar datos a una base de datos es 
-# Supabase.table('nombre_tabla').insert({'columna1': 'valor1', 'columna2': 'valor2'}).execute()
-
-#para actualizar datos a una base de datos es
-# Supabase.table('nombre_tabla').update({'columna1': 'valor1', 'columna2': 'valor2'}).eq('columna_id', 'id').execute()
-
-#para eliminar datos a una base de datos es
-# Supabase.table('nombre_tabla').delete().eq('columna_id', 'id').execute()
-
-#para obtener datos a una base de datos es
-# Supabase.table('nombre_tabla').select('*').execute()
-
-
-
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    except Exception as e:
+        print(f"Error en la sesión de base de datos: {e}")
+        raise
+    finally:
+        db.close()
