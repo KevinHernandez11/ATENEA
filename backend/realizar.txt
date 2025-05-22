@@ -24,6 +24,3 @@ Tecnologias Fronted
 -next.js
 -NodeJs
 -WebSockets
-
-SUPABASE_URL = https://agvehmajqgtdscgbofmd.supabase.co
-SUPABASE_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFndmVobWFqcWd0ZHNjZ2JvZm1kIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0Nzc0ODQ2OCwiZXhwIjoyMDYzMzI0NDY4fQ.eT-9s438MlVk9zXqNpByX-d-irib7Cx41fyrUaiB0-I

@@ -8,7 +8,7 @@ class UserBase(BaseModel):
     password: str
 
 class UserCreate(UserBase):
-    pass
+    confirm_password: str
 
 class UserResponse(UserBase):
     id: int
@@ -28,6 +28,18 @@ class UserDelete(BaseModel):
 
 class UserList(BaseModel):
     pass
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
+class UserLoginResponse(BaseModel):
+    message: str
+    token: str
+
+class UserLogout(BaseModel):
+    pass
+
 
 
 
