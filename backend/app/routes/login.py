@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.models.user import User
 from app.core.database import get_db
 from app.schemas.user import UserLogin , UserLoginResponse
-from app.core.security import crate_token
+from app.core.security import create_token
 import bcrypt
 
 login = APIRouter()
@@ -20,7 +20,7 @@ async def login_user(user: UserLogin, db: Session = Depends(get_db)):
     if not bcrypt.checkpw(user.password.encode('utf-8'), get_user.hashed_password.encode('utf-8')):
         raise HTTPException(status_code=400, detail="incorrect password")
     
-    token = crate_token(get_user.id)
+    token = create_token(get_user.id)
     
     return UserLoginResponse(
         message="login successful",

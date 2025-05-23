@@ -10,10 +10,7 @@ load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGHORITHM = os.getenv("ALGHORITHM")
 
-print(SECRET_KEY)
-print(ALGHORITHM)
-
-def crate_token(user_id: str):
+def create_token(user_id: str):
     db: Session = SessionLocal()
     try:
         user = db.query(User).filter(User.id == user_id).first()
@@ -29,6 +26,8 @@ def crate_token(user_id: str):
         return token
     finally:
         db.close()
-    
-    
+
+#manejar estados
+#UUID
+#Cambiar el token para que sea un UUID
 
