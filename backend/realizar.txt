@@ -23,4 +23,4 @@ Tecnologias Fronted
 -React
 -next.js
 -NodeJs
--WebSockets
+-WebSockets (notificaciones, actualizaciones en tiempo real)

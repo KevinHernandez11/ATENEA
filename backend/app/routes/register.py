@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from app.models.user import User
 from app.core.database import get_db
 from app.schemas.user import UserCreate, UserResponse
+from app.services.dependencies import HashService
 import bcrypt
 
 register = APIRouter()
@@ -28,9 +29,8 @@ async def read_users(user: UserCreate, db: Session = Depends(get_db)):
     if get_phone:
         raise HTTPException(status_code=400, detail="the phone already exists")
     
+    hashed_password = HashService.get_password_hash(user.password)
     
-
-    hashed_password = bcrypt.hashpw(user.password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
     
     data_user = User(

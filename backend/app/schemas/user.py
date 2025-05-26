@@ -1,7 +1,11 @@
 from pydantic import BaseModel
 from typing import Optional, List
+from app.services.auth_service import get_current_user
+import uuid
+
 
 class UserBase(BaseModel):
+
     username: str
     email: str
     phone: str
@@ -11,7 +15,7 @@ class UserCreate(UserBase):
     confirm_password: str
 
 class UserResponse(UserBase):
-    id: int
+    id: uuid.UUID
     fk_rol: Optional[int] = None
 
     class Config:
@@ -23,11 +27,11 @@ class UserUpdate(BaseModel):
     phone: Optional[str] = None
     password: Optional[str] = None
 
-class UserDelete(BaseModel):
-    id: int
+# class UserDelete(BaseModel):
+#     pass
 
-class UserList(BaseModel):
-    pass
+# class UserList(BaseModel):
+#     pass
 
 class UserLogin(BaseModel):
     email: str

@@ -1,32 +1,96 @@
-# # seed.py
-# from sqlalchemy.exc import SQLAlchemyError
-# from app.core.database import engine, SessionLocal, Base
-# from app.models.user import User
+#Clase "plantilla" que le da base a la creacion de los objectos
+class personaje:
+    #No hay necesidad de poner los atributos aqui pero igualmente es bueno tenerlo por el codigo legible
+    nombre = "unknown"
+    vida = 0
+    fuerza = 0
+    durabilidad = 0
 
-# def seed():
-#     # 1. Crea las tablas si no existen
-#     Base.metadata.create_all(bind=engine)
+    #Encargado de crear objectos instanciados(Constructor)
+    def __init__(self,nombre,vida,fuerza,durabilidad):
+        self.nombre = nombre
+        self.vida = vida
+        self.fuerza = fuerza
+        self.durabilidad = durabilidad
+
+    def atributos(self):
+        print(self.nombre)
+        print("vida:", self.vida)
+        print("Fuerza:", self.fuerza)
+        print("durabilidad:", self.durabilidad)
+
+    def subir_nivel(self,vida,fuerza,durabilidad):
+        self.vida += vida
+        self.fuerza += fuerza 
+        self.durabilidad += durabilidad
+
+    def vivo(self):
+        return self.vida > 0
     
-#     # 2. Crea una sesión
-#     session = SessionLocal()
-#     try:
-#         # 3. Instancia datos de prueba
-#         user1 = User(name="Alice Example", email="alice@example.com", phone="1234567890", hashed_password="hashedpassword")
+    def murido(self):
+        self.vida = 0
+        print(self.nombre, "Ha muerto")
 
-#         # 4. Agrega al session y confirma
-#         session.add_all([user1])
-#         session.commit()
-#         print("✅ Datos seed insertados correctamente")
-        
-#         # 5. Consulta para verificar
-#         users = session.query(User).all()
-#         for u in users:
-#             print(f"- {u.id}: {u.name} ({u.email})")
-#     except SQLAlchemyError as e:
-#         session.rollback()
-#         print("❌ Error al insertar datos:", e)
-#     finally:
-#         session.close()
+    def daño(self, enemigo):
+        return self.fuerza - enemigo.durabilidad
+    
+    def ataque(self,enemigo):
+        daño = self.daño(enemigo)
+        enemigo.vida -= daño
+        if enemigo.vivo():
+            print(self.nombre, "Le ha hecho" ,daño, "de daño a",enemigo.nombre,)
+            print("la vida de",enemigo.nombre,"es de",enemigo.vida)
+        else:
+            enemigo.murido()
 
-# if __name__ == "__main__":
-#     seed()
+
+# Instancias(objectos ya creados y alojados)
+otro_personaje = personaje("Fulano",100,5,2)
+mi_personaje = personaje("Kevzx",100,8,3)
+
+# mi_personaje.ataque(otro_personaje)
+
+class mago(personaje):
+    mana: 0
+
+
+    def __init__(self,nombre,vida,fuerza,durabilidad,mana):
+        #para usar todos los adtributos de 
+        super().__init__(nombre,vida,fuerza,durabilidad)
+        self.mana = mana
+
+    def atributos(self):
+        #para usar el metodo de la clase padre usamos super()
+        super().atributos()
+        print("Mana", self.mana)
+
+    def daño(self, enemigo):
+        return self.mana*self.fuerza - enemigo.durabilidad    
+
+
+#No se balancear personajes xd
+elfrien = mago("elfrien",50,3,70,50)
+lifa = mago("lifa",50,4,80,40)
+
+# elfrien.atributos()
+    
+
+class guerrero(personaje):
+    espdada: 0
+
+    def __init__(self, nombre, vida, fuerza, durabilidad,espada):
+        super().__init__(nombre, vida, fuerza, durabilidad)
+        self.espada = espada
+
+    def atributos(self):
+        super().atributos()
+        print("Espada:" ,self.espada)
+
+    def daño(self,enemigo):
+        return self.espada*self.fuerza - enemigo.durabilidad
+    
+
+dante = guerrero("dante",300,8,100,30)
+vergil = guerrero("vergil",300,7,90,25)
+
+dante.ataque(vergil)

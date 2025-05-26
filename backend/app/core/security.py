@@ -17,7 +17,7 @@ def create_token(user_id: str):
         if not user:
             return None
         payload = {
-            "username": user.username,
+            "id":str(user.id),
             "role": user.fk_rol,
              'exp':datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=24)
         }
