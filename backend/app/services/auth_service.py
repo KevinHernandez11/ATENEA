@@ -4,11 +4,12 @@ from jose import JWTError, jwt
 from app.core.database import SessionLocal
 from app.models.user import User
 from dotenv import load_dotenv
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordRequestForm , OAuth2PasswordBearer
 from fastapi import Depends
 from datetime import datetime, timedelta
 from app.core.database import get_db
 from app.services.dependencies import JWTService
+from typing import Annotated
 import os
 
 load_dotenv()
@@ -17,7 +18,9 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 ALGHORITHM = os.getenv("ALGHORITHM")
 EXPEDTION_TIME = int(os.getenv("EXPEDTION_TIME", 24))  # Default to 24 hours if not set
 
-async def get_current_user(db: Session = Depends(get_db), token: str = Depends(OAuth2PasswordRequestForm)):
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+
+async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db)):
     try:
         payload = JWTService.decode_token(token)
         id: str = payload.get("id")

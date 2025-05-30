@@ -6,7 +6,6 @@ from app.schemas.user import UserLogin , UserLoginResponse
 from app.core.security import create_token
 from fastapi.security import OAuth2PasswordRequestForm
 from app.services.auth_service import authenticate_user
-import bcrypt
 
 login = APIRouter()
 
