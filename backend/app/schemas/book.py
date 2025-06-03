@@ -7,11 +7,11 @@ class BookBase(BaseModel):
     description: str
 
 class BookCreate(BookBase):
-    pass 
+    fk_category: Optional[int] = None
+
 
 class BookResponse(BookBase):
     id: int
-    fk_category: Optional[int] = None
 
     class Config:
         orm_mode = True

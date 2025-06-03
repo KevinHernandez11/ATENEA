@@ -22,12 +22,12 @@ class JWTService():
     ALGHORITHM = os.getenv("ALGHORITHM")
     EXPEDTION_TIME = int(os.getenv("EXPEDTION_TIME", 24))
     
-    @staticmethod
-    def create_access_token(data: dict) -> str:
-        to_encode = data.copy()
-        expire = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=24)
-        to_encode.update({"exp": expire})
-        return jwt.encode(to_encode, JWTService.SECRET_KEY, JWTService.ALGHORITHM)
+    # @staticmethod
+    # def create_access_token(data: dict) -> str:
+    #     to_encode = data.copy()
+    #     expire = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=24)
+    #     to_encode.update({"exp": expire})
+    #     return jwt.encode(to_encode, JWTService.SECRET_KEY, JWTService.ALGHORITHM)
 
     @staticmethod
     def decode_token(token: str) -> dict:
@@ -35,7 +35,7 @@ class JWTService():
             payload = jwt.decode(token, JWTService.SECRET_KEY, JWTService.ALGHORITHM)
             return payload
         except JWTError:
-            return HTTPException(status_code=401, detail="Could not validate credentials")
+            raise HTTPException(status_code=401, detail="Could not validate credentials")
 
 
 
