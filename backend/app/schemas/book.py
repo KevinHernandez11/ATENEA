@@ -11,7 +11,7 @@ class BookCreate(BookBase):
 
 
 class BookResponse(BookBase):
-    id: int
+    pass
 
     class Config:
         orm_mode = True

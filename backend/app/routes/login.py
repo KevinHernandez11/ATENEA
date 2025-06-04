@@ -9,11 +9,12 @@ login = APIRouter()
 
 @login.post("/login/", tags=["login"], response_model=TokenResponse)
 async def login_user(form_data:OAuth2PasswordRequestForm = Depends()):
+    print(form_data)
     user = authenticate_user(form_data.username, form_data.password)
-    
+    print(user)
     if not user:
         raise HTTPException(status_code=401, detail="Invalid email or password")
-    
+    print(user.id, user.username)
     token = create_token(user.id)
     
     return TokenResponse(access_token=token, token_type="bearer")

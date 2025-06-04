@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime , Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -20,12 +20,11 @@ class Books(Base):
     name = Column(String, unique=True, index=True)
     author = Column(String)
     description = Column(String)
-    fk_category = Column(Integer, ForeignKey("categories.id"))
-    state = Column(String, default="available")
+    fk_categories = Column(Integer, ForeignKey("categories.id"))
+    state = Column(Boolean, default=False)
     book_state = Column(String, default="new")  
     category = relationship("Categories", back_populates="books")
     stock = relationship("Stock", back_populates="book")
-
 
 class Stock(Base):
     __tablename__ = "stock"

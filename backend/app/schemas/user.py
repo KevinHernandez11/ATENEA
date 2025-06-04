@@ -33,14 +33,6 @@ class UserUpdate(BaseModel):
 # class UserList(BaseModel):
 #     pass
 
-class UserLogin(BaseModel):
-    email: str
-    password: str
-
-class UserLoginResponse(BaseModel):
-    message: str
-    token: str
-
 class UserLogout(BaseModel):
     pass
 
