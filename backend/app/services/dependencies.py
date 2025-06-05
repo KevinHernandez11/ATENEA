@@ -1,9 +1,9 @@
 from jose import JWTError, jwt
 from fastapi.security import OAuth2PasswordBearer
+from app.core.database import get_db 
 from fastapi import HTTPException , Depends
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
-from app.services.dependencies import get_current_user
 from app.models.user import User
 
 import os
@@ -44,19 +44,25 @@ class JWTService():
 class AuthService():
 
     @staticmethod
-    def auth_rol_user(user: User = Depends(get_current_user)):
+    def auth_rol_user_books(User: User) -> User:
+        if not User:
+            raise HTTPException(status_code=401, detail="Not authenticated")
+        user = User
+
+        if not user.fk_rol:
+            raise HTTPException(status_code=403, detail="Access forbidden: No role assigned")
 
         roles = [
             "Admin",
-            "User"
+            "User",
             "SuperUser"
-            "Guest"
         ]
-
+        print(user)
+        print(f"User role: {user.fk_rol.name}, Required roles: {roles}")
 
         if not user:
             raise HTTPException(status_code=401, detail="Not authenticated")
-        if user.fk_rol != roles[0] or user.fk_rol != roles[1]:
-            raise HTTPException(status_code=403, detail="Access forbidden: Admins only")
-        return user
+        if user.fk_rol.name in roles:
+            return user
+        raise HTTPException(status_code=403, detail="Access forbidden: Admins only")
 
