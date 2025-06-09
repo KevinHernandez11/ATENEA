@@ -23,10 +23,10 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/login/")
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db)):
     try:
         payload = JWTService.decode_token(token)
-        id: str = payload.get("id")
-        if id is None:
+        user_id: str = payload.get("id")
+        if user_id is None:
             raise HTTPException(status_code=401, detail="Invalid authentication credentials")
-        user = db.query(User).filter(User.id == id).first()
+        user = db.query(User).filter(User.id == user_id).first()
         if user is None:
             raise HTTPException(status_code=401, detail="Invalid authentication credentials") 
         return user
@@ -35,7 +35,6 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Se
     
 # Función para autenticar usuario
 def authenticate_user(email: str, password: str):
-    print(email, password)
     user = SessionLocal().query(User).filter(User.email == email).first()
     if not user or not HashService.verify_password(password, user.hashed_password):
         return HTTPException(status_code=401, detail="Invalid email or password")

@@ -49,7 +49,7 @@ class AuthService():
             raise HTTPException(status_code=401, detail="Not authenticated")
         user = User
 
-        if not user.fk_rol:
+        if not user.rol:
             raise HTTPException(status_code=403, detail="Access forbidden: No role assigned")
 
         roles = [
@@ -57,12 +57,10 @@ class AuthService():
             "User",
             "SuperUser"
         ]
-        print(user)
-        print(f"User role: {user.fk_rol.name}, Required roles: {roles}")
 
         if not user:
             raise HTTPException(status_code=401, detail="Not authenticated")
-        if user.fk_rol.name in roles:
+        if user.rol.name in roles:
             return user
         raise HTTPException(status_code=403, detail="Access forbidden: Admins only")
 

@@ -18,11 +18,11 @@ class Rol(Base):
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    id = Column(Integer, primary_key=True, index=True, default=uuid.uuid4)
     username = Column(String, unique=True, index=True)
     email = Column(String, unique=True, index=True)
     phone = Column(String)
     hashed_password = Column(String)
-    fk_rol = Column(Integer, ForeignKey("roles.id"))
+    fk_rol = Column(Integer, ForeignKey("roles.id"), default=uuid.uuid4)
     rol = relationship("Rol", back_populates="users")
 
