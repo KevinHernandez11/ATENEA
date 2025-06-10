@@ -1,6 +1,6 @@
 from fastapi import APIRouter , Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.models.user import User
+from app.models.user import User, Rol
 from app.core.database import get_db
 from app.schemas.user import UserCreate, UserResponse
 from app.services.dependencies import HashService
@@ -31,12 +31,14 @@ async def read_users(form_data:OAuth2PasswordRequestForm = Depends(UserCreate), 
     
     hashed_password = HashService.get_password_hash(form_data.password)
 
-    data_user = User(
-        fk_rol=None,  
+    get_rol = db.query(Rol).filter(Rol.name == "User").first()
+
+    data_user = User(  
         username=form_data.username,
         email=form_data.email,
         phone=form_data.phone,
         hashed_password=hashed_password,
+        fk_rol = get_rol.id
     )
 
     db.add(data_user)
@@ -49,7 +51,7 @@ async def read_users(form_data:OAuth2PasswordRequestForm = Depends(UserCreate), 
         email=data_user.email,
         phone=data_user.phone,
         password=data_user.hashed_password,
-        fk_rol=data_user.fk_rol,
+        fk_rol=data_user.rol.name
     )
     
 

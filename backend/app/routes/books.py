@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app.models.book import Books
 from app.core.database import get_db 
 from app.services.auth_service import get_current_user
-from app.models.user import User
+from app.models.user import User, UserProfile
 from app.services.dependencies import AuthService
 from uuid import UUID
 
@@ -25,22 +25,20 @@ async def read_books(user: User = Depends(get_current_user)):
 async def create_book(book: BookCreate, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
 
     auth_user = AuthService.auth_rol_user_books(user)
-
     if not auth_user:
         raise HTTPException(status_code=401, detail="Not authenticated")
-    
+
     new_book = Books(
         name=book.name,
         author=book.author,
         description=book.description,
-        state=(auth_user.rol.name == "Admin")
-        
-    )
+        state= True if auth_user.rol.name == "Admin" else False,  # Only Admins can set state to True
+    )    
 
     db.add(new_book)
     db.commit()
     db.refresh(new_book)
-    
+ 
     return BookResponse(
         name=book.name,
         author=book.author,
@@ -102,11 +100,19 @@ async def update_book(book_id: UUID, book: BookUpdate, user: User = Depends(get_
 
 
 
-# @books.delete("/{book_id}", tags=["books"])
-# async def delete_book(book_id: int, user: str = Depends(get_current_user)):
-#     if not user:
-#         raise HTTPException(status_code=401, detail="Not authenticated")
-#     if user.get("fk_rol") != 1:
-#         raise HTTPException(status_code=403, detail="Access forbidden: Admins only")
+@books.delete("/{book_id}", tags=["books"])
+async def delete_book(book_id: UUID, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    auth_user = AuthService.auth_rol_user_books(user)
 
-#     return {"message": f"Book with ID {book_id} deleted successfully."}
+    if not auth_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    book = db.query(Books).filter(Books.id == book_id).first()
+
+    if not book:
+        raise HTTPException(status_code=404, detail="Book not found")
+
+    db.delete(book)
+    db.commit()
+
+    return {"message": "Book deleted successfully"}

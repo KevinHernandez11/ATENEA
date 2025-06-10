@@ -3,9 +3,9 @@ from fastapi.security import OAuth2PasswordBearer
 from app.core.database import get_db 
 from fastapi import HTTPException , Depends
 from passlib.context import CryptContext
-from datetime import datetime, timedelta
-from app.models.user import User
-
+from app.models.user import User , UserProfile
+from app.models.book import Books
+import datetime
 import os
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -62,5 +62,6 @@ class AuthService():
             raise HTTPException(status_code=401, detail="Not authenticated")
         if user.rol.name in roles:
             return user
-        raise HTTPException(status_code=403, detail="Access forbidden: Admins only")
+        raise HTTPException(status_code=403, detail="Access forbidden")
+    
 

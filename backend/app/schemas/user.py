@@ -16,7 +16,7 @@ class UserCreate(UserBase):
 
 class UserResponse(UserBase):
     id: uuid.UUID
-    fk_rol: Optional[int] = None
+    fk_rol: Optional[str] = None
 
     class Config:
         orm_mode = True

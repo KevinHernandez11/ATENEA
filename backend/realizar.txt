@@ -1,8 +1,8 @@
 #Crear una biblioteca donde se puedan comprar libros, agregar libros, eliminar libros y ver los libros disponibles.
 #Con POO crear las clases necesarias para la biblioteca, los libros y los usuarios.
 #Crear una base de datos donde se almacenen todos los datos de los libros y los usuarios --PENDIENTE--
-#Crear una API REST donde se puedan hacer peticiones para comprar, agregar, eliminar y ver los libros
-#crear un sistema de rutas para la API REST
+#Crear una API REST donde se puedan hacer peticiones para comprar, agregar, eliminar y ver los libros 
+#crear un sistema de rutas para la API REST --DONE--
 #Crear un login donde se pueda autenticar un usuario con sus datos y hashear su contraseña --DONE--
 #Crear un superUsuario con mas funcionalidades como agregar, eliminar y ver los libros para poder administrar la biblioteca
 #Crear un frontend donde se pueda ver la biblioteca y los libros disponibles
@@ -24,3 +24,11 @@ Tecnologias Fronted
 -next.js
 -NodeJs
 -WebSockets (notificaciones, actualizaciones en tiempo real)
+
+
+
+-Donde seria el borrado logico
+-Quito la conexion de la tabla user,books para la venta
+-Verificar logica actual de conexion y hablar sobre huecos de seguridad
+-Implemento sobre como guardar los libros completos y mostrarlos, y sobre como manejar el programa en general
+-Como manejar el sistema de venta con los usuarios
