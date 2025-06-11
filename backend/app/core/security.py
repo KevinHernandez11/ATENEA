@@ -3,12 +3,13 @@ from dotenv import load_dotenv
 from app.core.database import SessionLocal
 from sqlalchemy.orm import Session
 from app.models.user import User
+from dotenv import load_dotenv
 import os
 import datetime
 
 load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
-ALGHORITHM = os.getenv("ALGHORITHM")
+ALGORITHM = os.getenv("ALGORITHM")
 
 def create_token(user_id: str):
     db: Session = SessionLocal()
@@ -22,7 +23,7 @@ def create_token(user_id: str):
              'exp':datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=24)
         }
         print(payload)
-        token = jwt.encode(payload, SECRET_KEY, ALGHORITHM)
+        token = jwt.encode(payload, SECRET_KEY, ALGORITHM)
         return token
     finally:
         db.close()

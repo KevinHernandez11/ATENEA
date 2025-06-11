@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordBearer
 from app.core.database import get_db 
 from fastapi import HTTPException , Depends
 from passlib.context import CryptContext
-from app.models.user import User , UserProfile
+from app.models.user import User 
 from app.models.book import Books
 import datetime
 import os

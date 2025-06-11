@@ -25,19 +25,4 @@ class User(Base):
     state = Column(String, default="active")
 
     rol = relationship("Rol", back_populates="users")
-    profile = relationship("UserProfile", back_populates="user", uselist=False)
-
-
-class UserProfile(Base):
-
-    __tablename__ = "profile_user"
-
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    fk_user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
-    fk_books_id = Column(UUID(as_uuid=True), ForeignKey("books.id"), nullable=True)
-    books_history = Column(String, nullable=True)
-    created_at = Column(DateTime, default=func.now())
-
-
-    user = relationship("User", back_populates="profile")
-    book = relationship("Books", back_populates="user_profiles")
+    books = relationship("Books", back_populates="user")

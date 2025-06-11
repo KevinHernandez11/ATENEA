@@ -1,13 +1,19 @@
-from fastapi import APIRouter , Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from app.services.auth_service import get_current_user
 from app.schemas.book import BookResponse , BookCreate , BookUpdate
 from sqlalchemy.orm import Session
 from app.models.book import Books
 from app.core.database import get_db 
 from app.services.auth_service import get_current_user
-from app.models.user import User, UserProfile
+from app.models.user import User
 from app.services.dependencies import AuthService
 from uuid import UUID
+from dotenv import load_dotenv
+import cloudinary
+import cloudinary.uploader
+import os
+
+load_dotenv()
 
 books = APIRouter()
 
@@ -32,6 +38,7 @@ async def create_book(book: BookCreate, db: Session = Depends(get_db), user: Use
         name=book.name,
         author=book.author,
         description=book.description,
+        fk_user_id= auth_user.id,  # Assuming the book is linked to the user who created it
         state= True if auth_user.rol.name == "Admin" else False,  # Only Admins can set state to True
     )    
 
@@ -116,3 +123,45 @@ async def delete_book(book_id: UUID, user: User = Depends(get_current_user), db:
     db.commit()
 
     return {"message": "Book deleted successfully"}
+
+cloudinary.config(
+    cloud_name=os.getenv("CLOUD_NAME"),
+    api_key=os.getenv("API_KEY"),
+    api_secret=os.getenv("API_SECRET"),
+    secure=True
+)
+
+@books.post("/upload-pdf/")
+async def upload_pdf(file: UploadFile = File(...), db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    if not file.filename.endswith(".pdf"):
+        return {"error": "Solo se permiten archivos PDF"}
+
+    # Leer el contenido del archivo
+    contents = await file.read()
+
+    try:
+        # Subir a Cloudinary
+        result = cloudinary.uploader.upload(
+            contents,
+            resource_type="raw",  # Necesario para PDF u otros archivos no imagen
+            public_id=os.path.splitext(file.filename)[0],
+            folder="pdfs/"  # Opcional: guarda en carpeta específica
+        )
+        
+        new_book = Books(
+            content=result["secure_url"],  # Guarda la URL del PDF
+            state_content=True  # Asumiendo que quieres marcar el contenido como disponible
+        )
+
+        db.add(new_book)
+        db.commit()
+        db.refresh(new_book)
+
+        return {
+            "message": "Archivo subido con éxito",
+            "url": result["secure_url"]
+        }
+    
+
+    except Exception as e:
+        return {"error": "Error al subir a Cloudinary", "details": str(e)}
