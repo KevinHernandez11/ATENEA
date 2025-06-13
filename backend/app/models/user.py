@@ -26,3 +26,4 @@ class User(Base):
 
     rol = relationship("Rol", back_populates="users")
     books = relationship("Books", back_populates="user")
+    purchases = relationship("Purchase", back_populates="user")

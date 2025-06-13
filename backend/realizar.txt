@@ -10,6 +10,8 @@
 #Crear un perfil con historial de libros leidos
 #Que el usuario pueda escribir su propio libro o articulo y guardarlo
 
+#Que se pueda registrar y logear por medio de Oauth2
+
 #(OPCIONAL)
 #Que se le recomiende libros al usuario dependiendo de sus gustos
 

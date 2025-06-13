@@ -28,8 +28,9 @@ class Books(Base):
 
     category = relationship("Categories", back_populates="books")
     stock = relationship("Stock", back_populates="book_stock")
-    chapters = relationship("book_chapters", back_populates="book_cap", cascade="all, delete-orphan")
     user = relationship("User", back_populates="books")
+    purchases = relationship("Purchase", back_populates="book_purchase")
+    
 
 class Stock(Base):
     __tablename__ = "stock"
@@ -41,14 +42,3 @@ class Stock(Base):
 
     book_stock = relationship("Books", back_populates="stock")
 
-
-class book_chapters(Base):
-    __tablename__ = "book_chapters"
-
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    fk_book_id = Column(UUID(as_uuid=True), ForeignKey("books.id"))
-    chapter_number = Column(Integer)
-    title = Column(String)
-    content = Column(String)
-
-    book_cap = relationship("Books", back_populates="chapters")

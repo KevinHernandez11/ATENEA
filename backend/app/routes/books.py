@@ -1,17 +1,18 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from app.services.auth_service import get_current_user
-from app.schemas.book import BookResponse , BookCreate , BookUpdate
+from app.schemas.book import BookResponse , BookCreate , BookUpdate , ContentBook
 from sqlalchemy.orm import Session
 from app.models.book import Books
 from app.core.database import get_db 
 from app.services.auth_service import get_current_user
 from app.models.user import User
 from app.services.dependencies import AuthService
-from uuid import UUID
+from uuid import UUID, uuid4
 from dotenv import load_dotenv
 import cloudinary
 import cloudinary.uploader
 import os
+import requests
 
 load_dotenv()
 
@@ -144,7 +145,7 @@ async def upload_pdf(file: UploadFile = File(...), db: Session = Depends(get_db)
         result = cloudinary.uploader.upload(
             contents,
             resource_type="raw",  # Necesario para PDF u otros archivos no imagen
-            public_id=os.path.splitext(file.filename)[0],
+            public_id="uploaded_text_file",  # Replace with a static or dynamic identifier
             folder="pdfs/"  # Opcional: guarda en carpeta específica
         )
         
@@ -165,3 +166,62 @@ async def upload_pdf(file: UploadFile = File(...), db: Session = Depends(get_db)
 
     except Exception as e:
         return {"error": "Error al subir a Cloudinary", "details": str(e)}
+
+
+@books.post("/Text")
+async def upload_text(Book: ContentBook, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    auth_user = AuthService.auth_rol_user_books(user)
+ 
+    filename = f"{uuid4()}.txt"
+    with open(filename, "w", encoding="utf-8") as archivo:
+        archivo.write(Book.content)
+
+    try:
+        # Subir a Cloudinary
+        result = cloudinary.uploader.upload(
+            filename,  # Nombre del archivo local
+            resource_type="raw",  # Necesario para archivos de texto
+            folder="BooksContent/"  # Opcional: guarda en carpeta específica
+        )
+
+        os.remove(filename)  # Eliminar el archivo local después de subirlo
+
+        new_book = Books(
+            content=result["secure_url"],  # Guarda la URL del archivo de texto
+            content_state=True,  # Asumiendo que quieres marcar el contenido como disponible
+            fk_user_id=auth_user.id,  # Asociar el contenido del libro al usuario logueado  
+        )
+
+        db.add(new_book)
+        db.commit()
+        db.refresh(new_book)
+
+        return {
+            "message": "Archivo de texto subido con éxito",
+            "url": result["secure_url"]
+        }
+    
+    except Exception as e:
+        return {"error": "Error al subir a Cloudinary", "details": str(e)}
+    
+
+@books.get("/books/{book_id}/content", tags=["books"])
+async def get_book_content(book_id: UUID, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    auth_user = AuthService.auth_rol_user_books(user)
+
+    if not auth_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+
+    book = db.query(Books).filter(Books.id == book_id).first()
+
+    if not book or not book.content:
+        raise HTTPException(status_code=404, detail="Book content not found")
+    
+    response = requests.get(book.content)
+    if response.status_code != 200:
+        raise HTTPException(status_code=404, detail="Content not found")
+    
+    
+    return ContentBook(
+        content=response.text
+    )

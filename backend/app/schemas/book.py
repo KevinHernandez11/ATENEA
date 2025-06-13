@@ -30,6 +30,16 @@ class BookDelete(BaseModel):
     id: UUID
 
 
+class ContentBook(BaseModel):
+    content: str
+
+    class Config:
+        orm_mode = True
+        use_enum_values = True
+        arbitrary_types_allowed = True
+        json_encoders = {
+            UUID: str,
+        }
 
 # class BookListResponse(BaseModel):
 #     books: List[BookResponse]

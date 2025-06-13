@@ -2,26 +2,58 @@ from fastapi import APIRouter
 from fastapi import Depends
 from app.services.auth_service import get_current_user
 from app.models.user import User
+from sqlalchemy.orm import Session
+from app.core.database import get_db
+from app.models.purchase import Purchase
+from app.schemas.purchase import PurchaseRequest
+from datetime import datetime
+from dotenv import load_dotenv
+# from google.oauth2 import service_account
+import stripe
+import os
 
+purchase = APIRouter()
 
-sales = APIRouter()
+load_dotenv()
 
-@sales.get("/sales/", tags=["sales"])
-async def read_sales(user: User = Depends(get_current_user)):
-    return {"message": "List of sales"}
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
-@sales.post("/sales/", tags=["sales"])
-async def create_sell(user: User = Depends(get_current_user)):
-    return {"message": "Sell created"}
+@purchase.post("/checkout")
+def checkout(purchase: PurchaseRequest, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    try:
+        # Stripe requires the amount to be in the smallest currency unit (e.g., cents for USD).
+        # Since COP does not use fractional units, we can pass the amount directly.
+        intent = stripe.PaymentIntent.create(
+            amount=int(purchase.amount),  # Monto en pesos colombianos directamente
+            currency="cop",
+            payment_method=purchase.payment_method_id,
+            confirm=True
+        )
 
-@sales.get("/sales/{sales_id}", tags=["sales"])
-async def get_sell(sales_id: int, user: User = Depends(get_current_user)):
-    return {"message": f"Details of sell {sales_id}"}
+        charge = intent.charges.data[0]
 
-@sales.put("/sales/{sales_id}", tags=["sales"])
-async def update_sell(sales_id: int, user: User = Depends(get_current_user)):
-    return {"message": f"Sell {sales_id} updated"}
+        transaction = Purchase(
+            user_id=user.id,
+            book_id=purchase.Book_id,
+            stripe_payment_id=intent.id,
+            amount=purchase.amount,
+            currency=intent.currency,
+            status=intent.status,
+            method=intent.payment_method_types[0],
+            card_last4=charge.payment_method_details.card.last4,
+            card_brand=charge.payment_method_details.card.brand,
+            created_at=datetime.fromtimestamp(intent.created),
+            metadata=intent.metadata
+        )
 
-@sales.delete("/sales/{sales_id}", tags=["sales"])
-async def delete_sell(sales_id: int, user: User = Depends(get_current_user)):
-    return {"message": f"Sell {sales_id} deleted"}
+        db.add(transaction)
+        db.commit()
+        db.refresh(transaction)
+
+        return {"message": "Pago exitoso", "payment_id": intent.id}
+
+    except stripe.error.StripeError as e:
+        return {"error": str(e)}
+
+    
+
