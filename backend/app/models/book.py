@@ -22,7 +22,7 @@ class Books(Base):
     fk_categories = Column(UUID(as_uuid=True), ForeignKey("categories.id"))
     fk_user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
     content = Column(String)
-    state = Column(Boolean, default=False)
+    state = Column(String, default=False)
     book_state = Column(String, default="new")
     content_state = Column(Boolean)
 

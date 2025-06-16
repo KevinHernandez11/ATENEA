@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 from app.services.auth_service import get_current_user
 from app.models.user import User
 from sqlalchemy.orm import Session
@@ -8,6 +8,7 @@ from app.models.purchase import Purchase
 from app.schemas.purchase import PurchaseRequest
 from datetime import datetime
 from dotenv import load_dotenv
+
 # from google.oauth2 import service_account
 import stripe
 import os
@@ -19,7 +20,8 @@ load_dotenv()
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
 @purchase.post("/checkout")
-def checkout(purchase: PurchaseRequest, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+def checkout(purchase: PurchaseRequest, db: Session = Depends(get_db)):
+    user = "580c40c2-5327-47fd-a5ec-ab3e42d79cbb"  # For testing purposes, replace with actual user retrieval logic
     try:
         # Stripe requires the amount to be in the smallest currency unit (e.g., cents for USD).
         # Since COP does not use fractional units, we can pass the amount directly.
@@ -27,21 +29,29 @@ def checkout(purchase: PurchaseRequest, db: Session = Depends(get_db), user: Use
             amount=int(purchase.amount),  # Monto en pesos colombianos directamente
             currency="cop",
             payment_method=purchase.payment_method_id,
-            confirm=True
+            confirm=True,
+            automatic_payment_methods={
+                "enabled": True,
+                "allow_redirects": "never"
+            },
+        #     expand=["charges"]
         )
 
-        charge = intent.charges.data[0]
+        # charges = intent.get("charges", {}).get("data", [])
+        # if not charges:
+        #     raise HTTPException(status_code=400, detail="No se generó ningún cargo")
+
+        # charge = charges[0]
 
         transaction = Purchase(
-            user_id=user.id,
-            book_id=purchase.Book_id,
+            user_id=user,
             stripe_payment_id=intent.id,
             amount=purchase.amount,
             currency=intent.currency,
             status=intent.status,
             method=intent.payment_method_types[0],
-            card_last4=charge.payment_method_details.card.last4,
-            card_brand=charge.payment_method_details.card.brand,
+            card_last4=None,
+            card_brand=None,
             created_at=datetime.fromtimestamp(intent.created),
             metadata=intent.metadata
         )

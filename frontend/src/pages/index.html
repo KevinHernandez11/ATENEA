@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Pagar con Stripe</title>
+  <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+  <h2>Pago con tarjeta</h2>
+  <form id="payment-form">
+    <div id="card-element"></div>
+    <button id="submit">Pagar</button>
+  </form>
+
+  <script>
+    const stripe = Stripe("pk_test_51RZa4fDawYQOLdaeRv9GSaDMEr3AKRxC50mDYFvhc8oqVYAizRasYNSnaLL46KYwws0ZGjcdtJ2r57opxoHICkek00DkzuGtAg"); // Reemplaza con tu clave pública
+    const elements = stripe.elements();
+    const card = elements.create("card");
+    card.mount("#card-element");
+
+    const form = document.getElementById("payment-form");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const { paymentMethod, error } = await stripe.createPaymentMethod({
+        type: "card",
+        card: card
+      });
+
+      if (error) {
+        alert(error.message);
+        return;
+      }
+      const token = localStorage.getItem("access_token"); // O desde donde lo tengas
+      // Enviar al backend
+      const res = await fetch("http://localhost:8000/api/v1/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" 
+            , "Authorization": `Bearer ${token}`  // Agregar el token de autorización
+        },
+        body: JSON.stringify({
+          amount: 500000,
+          payment_method_id: paymentMethod.id
+          
+        })
+      });
+
+      const data = await res.json();
+      alert(JSON.stringify(data));
+    });
+  </script>
+</body>
+</html>

@@ -120,10 +120,13 @@ async def delete_book(book_id: UUID, user: User = Depends(get_current_user), db:
     if not book:
         raise HTTPException(status_code=404, detail="Book not found")
 
-    db.delete(book)
+    book.state = "Deleted"  # Assuming you want to mark the book as deleted instead of removing it
+    
     db.commit()
 
+
     return {"message": "Book deleted successfully"}
+
 
 cloudinary.config(
     cloud_name=os.getenv("CLOUD_NAME"),
