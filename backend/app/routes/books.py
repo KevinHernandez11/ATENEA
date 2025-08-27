@@ -39,7 +39,7 @@ async def create_book(book: BookCreate, db: Session = Depends(get_db), user: Use
         name=book.name,
         author=book.author,
         description=book.description,
-        fk_user_id= auth_user.id,  # Assuming the book is linked to the user who created it
+        fk_user_id= auth_user.id,  # Assuming the book is linked t o the user who created it
         state= True if auth_user.rol.name == "Admin" else False,  # Only Admins can set state to True
     )    
 

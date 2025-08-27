@@ -28,7 +28,7 @@ class JWTService():
     @staticmethod
     def create_access_token(data: dict) -> str:
         to_encode = data.copy()
-        expire = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=24)
+        expire = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=JWTService.EXPEDTION_TIME)
         to_encode.update({"exp": expire})
         return jwt.encode(to_encode, JWTService.SECRET_KEY, JWTService.ALGHORITHM)
 
