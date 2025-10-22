@@ -21,9 +21,8 @@ class BookResponse(BookBase):
 class BookUpdate(BaseModel):
     name: Optional[str] = None
     author: Optional[str] = None
-    category: Optional[str] = None
+    fk_category: Optional[UUID] = None
     description: Optional[str] = None
-    category: Optional[UUID] = None
 
 
 class BookDelete(BaseModel):

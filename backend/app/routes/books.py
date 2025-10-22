@@ -27,7 +27,8 @@ async def read_books(user: User = Depends(get_current_user)):
     
     return {"message": "List of books", "user": auth_user.email}
 
-#Esta ruta es pra crear un libro
+
+
 @books.post("/books/", tags=["books"], response_model=BookResponse)
 async def create_book(book: BookCreate, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
 
@@ -96,14 +97,14 @@ async def update_book(book_id: UUID, book: BookUpdate, user: User = Depends(get_
     if book.fk_category:
         existing_book.fk_category = book.fk_category
 
-    db.commit()
+    db.commit() 
     db.refresh(existing_book)
 
     return BookResponse(
         name=existing_book.name,
         author=existing_book.author,
         description=existing_book.description,
-        content=existing_book.content.content if existing_book.content.content else None
+        content=existing_book.content if existing_book.content else None
     )
 
 

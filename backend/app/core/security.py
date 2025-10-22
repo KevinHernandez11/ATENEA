@@ -20,15 +20,10 @@ def create_token(user_id: str):
         payload = {
             "id":str(user.id),
             "role": str(user.fk_rol),
-             'exp':datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=24)
+            'exp':datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=24)
         }
         print(payload)
         token = jwt.encode(payload, SECRET_KEY, ALGORITHM)
         return token
     finally:
         db.close()
-
-#manejar estados
-#UUID
-#Cambiar el token para que sea un UUID
-
