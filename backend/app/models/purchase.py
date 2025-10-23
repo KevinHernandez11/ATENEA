@@ -3,7 +3,7 @@ from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
 from uuid import uuid4
 from datetime import datetime
-from app.models import Base  # Asegúrate de tener esto en tu proyecto
+from app.models.base import Base 
 
 class Purchase(Base):
     __tablename__ = "purchase_data"

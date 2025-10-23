@@ -13,6 +13,7 @@ class BookCreate(BookBase):
 
 class BookResponse(BookBase):
     content: Optional[str] = None
+    category: Optional[UUID] = None
 
     class Config:
         orm_mode = True

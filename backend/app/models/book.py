@@ -22,12 +22,12 @@ class Books(Base):
     fk_categories = Column(UUID(as_uuid=True), ForeignKey("categories.id"))
     fk_user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
     content = Column(String)
-    state = Column(String, default=False)
+    state = Column(String, default="False")
     book_state = Column(String, default="new")
     content_state = Column(Boolean)
 
     category = relationship("Categories", back_populates="books")
-    stock = relationship("Stock", back_populates="book_stock")
+    stock = relationship("Stock", back_populates="book_stock", uselist=False)
     user = relationship("User", back_populates="books")
     purchases = relationship("Purchase", back_populates="book_purchase")
     

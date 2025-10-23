@@ -73,7 +73,7 @@ async def get_book(book_id: UUID, user: User = Depends(get_current_user), db: Se
         name=book.name,
         author=book.author,
         description=book.description,
-        content=book.content.content if book.content.content else None
+        content=book.content if book.content else None
     )
     
 # Esta ruta es para actualizar un libro por su ID
@@ -104,7 +104,8 @@ async def update_book(book_id: UUID, book: BookUpdate, user: User = Depends(get_
         name=existing_book.name,
         author=existing_book.author,
         description=existing_book.description,
-        content=existing_book.content if existing_book.content else None
+        content=existing_book.content if existing_book.content else None,
+        category=existing_book.fk_category if existing_book.fk_category else None
     )
 
 
@@ -121,7 +122,7 @@ async def delete_book(book_id: UUID, user: User = Depends(get_current_user), db:
     if not book:
         raise HTTPException(status_code=404, detail="Book not found")
 
-    book.state = "Deleted"  # Assuming you want to mark the book as deleted instead of removing it
+    book.state = "deleted"  # Assuming you want to mark the book as deleted instead of removing it
     
     db.commit()
 
@@ -148,14 +149,14 @@ async def upload_pdf(file: UploadFile = File(...), db: Session = Depends(get_db)
         # Subir a Cloudinary
         result = cloudinary.uploader.upload(
             contents,
-            resource_type="raw",  # Necesario para PDF u otros archivos no imagen
+            resource_type="auto",  # Necesario para PDF u otros archivos no imagen
             public_id="uploaded_text_file",  # Replace with a static or dynamic identifier
             folder="pdfs/"  # Opcional: guarda en carpeta específica
         )
         
         new_book = Books(
             content=result["secure_url"],  # Guarda la URL del PDF
-            state_content=True  # Asumiendo que quieres marcar el contenido como disponible
+            content_state=True  # Asumiendo que quieres marcar el contenido como disponible
         )
 
         db.add(new_book)
@@ -209,10 +210,18 @@ async def upload_text(Book: ContentBook, db: Session = Depends(get_db), user: Us
         return {"error": "Error al subir a Cloudinary", "details": str(e)}
     
 
-@books.get("/books/{book_id}/content", tags=["books"])
-async def get_book_content(book_id: UUID, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    auth_user = AuthService.auth_rol_user_books(user)
+from fastapi.responses import StreamingResponse, PlainTextResponse
+import requests
+from io import BytesIO
 
+from fastapi.responses import StreamingResponse, PlainTextResponse
+import requests
+from io import BytesIO
+
+@books.get("/books/{book_id}/content", tags=["books"])
+async def get_book_content(book_id: UUID,user: User = Depends(get_current_user),db: Session = Depends(get_db)):
+
+    auth_user = AuthService.auth_rol_user_books(user)
     if not auth_user:
         raise HTTPException(status_code=401, detail="Not authenticated")
 
@@ -220,12 +229,8 @@ async def get_book_content(book_id: UUID, user: User = Depends(get_current_user)
 
     if not book or not book.content:
         raise HTTPException(status_code=404, detail="Book content not found")
-    
+
     response = requests.get(book.content)
+
     if response.status_code != 200:
         raise HTTPException(status_code=404, detail="Content not found")
-    
-    
-    return ContentBook(
-        content=response.text
-    )
